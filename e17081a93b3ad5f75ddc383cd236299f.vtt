@@ -1,0 +1,306 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:01.560 --> 00:00:09.300
+We present Distilled Feature Fields Enable&nbsp;
+Few-Shot Language-Guided Manipulation.&nbsp;&nbsp;
+
+00:00:09.300 --> 00:00:14.700
+In this project, we consider a few-shot&nbsp;
+imitation learning scenario, where a robot&nbsp;&nbsp;
+
+00:00:14.700 --> 00:00:20.280
+has been given a few demonstrations&nbsp;
+of how to grasp and place objects.&nbsp;&nbsp;
+
+00:00:20.280 --> 00:00:25.740
+Given this small set of demonstrations, we want to&nbsp;
+enable the robot to generalize to an open set of&nbsp;&nbsp;
+
+00:00:25.740 --> 00:00:31.860
+objects that come in different shapes and poses&nbsp;
+and sometimes from different object categories.&nbsp;&nbsp;
+
+00:00:31.860 --> 00:00:36.660
+Our key idea is to leverage foundation&nbsp;
+models trained on internet-scale datasets,&nbsp;&nbsp;
+
+00:00:36.660 --> 00:00:41.995
+which embed common-sense understanding&nbsp;
+of the world from two-dimensional images.&nbsp;&nbsp;
+
+00:00:41.995 --> 00:00:45.360
+We combine these foundation models&nbsp;
+with neural radiance fields, or NeRFs,&nbsp;&nbsp;
+
+00:00:45.360 --> 00:00:52.620
+to lift these two-dimensional features into 3D.&nbsp;
+We call this general approach feature fields&nbsp;&nbsp;
+
+00:00:52.620 --> 00:01:02.100
+for robotic manipulation, or F3RM. F3RM&nbsp;
+contains the following three components.&nbsp;&nbsp;
+
+00:01:02.100 --> 00:01:08.040
+The first component is a way to produce 3D&nbsp;
+feature fields from 2D foundation models in a&nbsp;&nbsp;
+
+00:01:08.040 --> 00:01:17.160
+robotic manipulation setting. The second component&nbsp;
+is a way to accomplish few-shot manipulation.&nbsp;&nbsp;
+
+00:01:17.160 --> 00:01:24.960
+The third component is adding natural language&nbsp;
+for open-text, language-guided manipulation.&nbsp;&nbsp;
+
+00:01:24.960 --> 00:01:31.920
+We will start with our automated system for&nbsp;
+making 3D feature fields in a robotic setup.&nbsp;&nbsp;
+
+00:01:31.920 --> 00:01:36.600
+The first step is for the robot to scan&nbsp;
+the scene using a camera mounted at the&nbsp;&nbsp;
+
+00:01:36.600 --> 00:01:41.820
+end of the selfie stick. The robot collects 50&nbsp;
+color images of the scene at different poses,&nbsp;&nbsp;
+
+00:01:41.820 --> 00:01:50.700
+which can be used to build a neural&nbsp;
+radiance field at a high level of detail.&nbsp;&nbsp;
+
+00:01:50.700 --> 00:01:56.220
+In our setup, however, besides the color&nbsp;
+pixel values, our neural fields also&nbsp;&nbsp;
+
+00:01:56.220 --> 00:02:01.560
+reconstruct two-dimensional visual features from&nbsp;
+vision foundation models such as DINO or CLIP.&nbsp;&nbsp;
+
+00:02:01.560 --> 00:02:06.240
+Take this scene, for example, where we produce&nbsp;
+a three-dimensional DINO field using the same&nbsp;&nbsp;
+
+00:02:06.240 --> 00:02:12.960
+differentiable volume rendering pipeline as NeRF.&nbsp;
+The color in this rendering corresponds to the&nbsp;&nbsp;
+
+00:02:12.960 --> 00:02:19.800
+principal components of the DINO features. Notice&nbsp;
+both the semantic boundaries between objects and&nbsp;&nbsp;
+
+00:02:19.800 --> 00:02:28.440
+the geometric details. How are we going to&nbsp;
+use feature fields for robotic manipulation?&nbsp;&nbsp;
+
+00:02:28.440 --> 00:02:34.980
+Many manipulation tasks may be formulated as&nbsp;
+learning to predict 6 degrees of freedom poses.&nbsp;&nbsp;
+
+00:02:34.980 --> 00:02:41.400
+We can represent a demonstration of this type by&nbsp;
+the local context in the 3D feature field. To do&nbsp;&nbsp;
+
+00:02:41.400 --> 00:02:47.700
+so, we first sample a set of query points in the&nbsp;
+canonical frame of the gripper. Now take grasping&nbsp;&nbsp;
+
+00:02:47.700 --> 00:02:52.260
+this red mug by the handle, for example. We sample&nbsp;
+features in the feature field at the query points&nbsp;&nbsp;
+
+00:02:52.260 --> 00:03:01.560
+and concatenate them to get a local geometric&nbsp;
+and semantic representation of the demonstration.&nbsp;&nbsp;
+
+00:03:01.560 --> 00:03:08.280
+Now at test time, the robot is given a novel scene&nbsp;
+that contains objects that have not seen before.&nbsp;&nbsp;
+
+00:03:08.280 --> 00:03:11.640
+The robot scans the scene and then&nbsp;
+performs optimization to find the&nbsp;&nbsp;
+
+00:03:11.640 --> 00:03:16.380
+grasp that maximizes its similarity&nbsp;
+to the small number of demonstrations.&nbsp;&nbsp;
+
+00:03:16.380 --> 00:03:21.600
+By optimizing for a grasp over the entire scene,&nbsp;
+we get the grasps for the pink mug shown on the&nbsp;&nbsp;
+
+00:03:21.600 --> 00:03:28.500
+right. We then use motion planning to find&nbsp;
+and execute a feasible grasp on the robot.&nbsp;&nbsp;
+
+00:03:28.500 --> 00:03:33.120
+How can we enable language-guided manipulation&nbsp;
+using feature fields distilled from CLIP,&nbsp;&nbsp;
+
+00:03:33.120 --> 00:03:39.600
+a vision language model? We designate novel&nbsp;
+objects to manipulate via natural language.&nbsp;&nbsp;
+
+00:03:39.600 --> 00:03:46.680
+Consider the user asking the robot to pick up&nbsp;
+the bowl. Our pipeline consists of two stages.&nbsp;&nbsp;
+
+00:03:46.680 --> 00:03:51.360
+In the first stage, we use language to&nbsp;
+retrieve the relevant demonstrations.&nbsp;&nbsp;
+
+00:03:51.360 --> 00:03:56.280
+We extract the text features for the user query&nbsp;
+from CLIP and compute the similarity between these&nbsp;&nbsp;
+
+00:03:56.280 --> 00:04:03.000
+text features and the mean query point features in&nbsp;
+a demonstration. We repeat this computation over a&nbsp;&nbsp;
+
+00:04:03.000 --> 00:04:09.660
+set of demonstrations and select the one that has&nbsp;
+the highest similarity to the embedded text query.&nbsp;&nbsp;
+
+00:04:09.660 --> 00:04:17.040
+For grasping the bowl, this process selects the&nbsp;
+demonstration for grasping a mug by its lip.&nbsp;&nbsp;
+
+00:04:17.040 --> 00:04:23.040
+In the second stage, we perform language-guided&nbsp;
+pose optimization. We search for a grasp that&nbsp;&nbsp;
+
+00:04:23.040 --> 00:04:28.020
+maximizes the similarity between a weighting&nbsp;
+of the text features for the language query&nbsp;&nbsp;
+
+00:04:28.020 --> 00:04:33.540
+and the demonstrations retrieved from the&nbsp;
+first stage. This allows us to focus both on&nbsp;&nbsp;
+
+00:04:33.540 --> 00:04:38.880
+the object the user specifies and the local&nbsp;
+geometric features important for grasping.&nbsp;&nbsp;
+
+00:04:38.880 --> 00:04:46.140
+We optimize over the entire scene and&nbsp;
+successfully find six DoF grasps for the bowl.&nbsp;&nbsp;
+
+00:04:46.140 --> 00:04:53.220
+Observe that language guidance allows us to ignore&nbsp;
+the mugs that are also present in the scene.&nbsp;&nbsp;
+
+00:04:53.220 --> 00:04:57.300
+Let's now look at some results on the real robot.&nbsp;&nbsp;
+
+00:04:57.300 --> 00:05:02.940
+We first set up a scene with objects collected&nbsp;
+around the lab in a variety of six DoF poses.&nbsp;&nbsp;
+
+00:05:02.940 --> 00:05:07.620
+Note that the robot has never seen these&nbsp;
+exact objects in the demonstrations.&nbsp;&nbsp;
+
+00:05:07.620 --> 00:05:13.800
+The robot then picks up a camera mounted on the&nbsp;
+selfie stick and scans a series of RGB images.&nbsp;&nbsp;
+
+00:05:13.800 --> 00:05:19.860
+We then train the NeRF and distill CLIP&nbsp;
+features. Here we show a visualization&nbsp;&nbsp;
+
+00:05:19.860 --> 00:05:27.120
+of the NeRF along with the principal&nbsp;
+components of the CLIP feature field.&nbsp;&nbsp;
+
+00:05:27.120 --> 00:05:31.500
+We now use language to designate&nbsp;
+novel objects to manipulate.&nbsp;&nbsp;
+
+00:05:31.500 --> 00:05:36.540
+We first ask the robot to pick up "Baymax",&nbsp;
+an out of distribution object category.&nbsp;&nbsp;
+
+00:05:36.540 --> 00:05:42.780
+We show the language similarity heatmap&nbsp;
+of "Baymax" over the CLIP feature field.&nbsp;&nbsp;
+
+00:05:42.780 --> 00:05:47.940
+We successfully infer a grasp and execute it on&nbsp;
+the robot. Note that the closest demonstration&nbsp;&nbsp;
+
+00:05:47.940 --> 00:05:55.080
+was grasping a caterpillar toy by its ear.&nbsp;
+Language also enables us to specify objects&nbsp;&nbsp;
+
+00:05:55.080 --> 00:06:01.500
+by their color. In this scene there's both a blue&nbsp;
+and a red screwdriver. We reuse the CLIP feature&nbsp;&nbsp;
+
+00:06:01.500 --> 00:06:07.140
+field to sequentially execute grasps and show the&nbsp;
+similarity heatmap. Language guidance guides the&nbsp;&nbsp;
+
+00:06:07.140 --> 00:06:14.640
+optimization towards the "blue screwdriver"&nbsp;
+which we are able to successfully grasp.&nbsp;&nbsp;
+
+00:06:14.640 --> 00:06:20.520
+We show the execution for the "bowl" presented&nbsp;
+earlier, an out of distribution object category.&nbsp;&nbsp;
+
+00:06:20.520 --> 00:06:25.440
+We match the language query to the demonstration&nbsp;
+of grasping a mug by its lip and successfully&nbsp;&nbsp;
+
+00:06:25.440 --> 00:06:34.740
+infer a stable 6-DOF grasp and execute it on&nbsp;
+the robot. We now demonstrate that the robot&nbsp;&nbsp;
+
+00:06:34.740 --> 00:06:39.540
+is able to handle the "red screwdriver"&nbsp;
+in addition to the "blue screwdriver".&nbsp;&nbsp;
+
+00:06:39.540 --> 00:06:43.740
+The vision language features from CLIP allow&nbsp;
+us to distinguish the red screwdriver from&nbsp;&nbsp;
+
+00:06:43.740 --> 00:06:51.480
+the blue one and predict a successful grasp&nbsp;
+to place the screwdriver into the container.&nbsp;&nbsp;
+
+00:06:51.480 --> 00:06:55.200
+Finally, language enables us to&nbsp;
+specify objects by their material&nbsp;&nbsp;
+
+00:06:55.200 --> 00:07:00.780
+properties. In this scene there's&nbsp;
+both a transparent and a metal jug.&nbsp;&nbsp;
+
+00:07:00.780 --> 00:07:06.420
+We successfully predict a grasp on the transparent&nbsp;
+jug using language guided pose optimization and&nbsp;&nbsp;
+
+00:07:06.420 --> 00:07:12.960
+execute it on the robot. To summarize,&nbsp;
+we designate novel objects to manipulate&nbsp;&nbsp;
+
+00:07:12.960 --> 00:07:19.200
+via language. We achieve this using only 10&nbsp;
+demonstrations across 4 object categories.&nbsp;&nbsp;
+
+00:07:19.200 --> 00:07:23.220
+We showcase the ability to generalize to&nbsp;
+out of distribution object categories,&nbsp;&nbsp;
+
+00:07:23.220 --> 00:07:30.540
+as well as specifying objects by&nbsp;
+their color and material properties.&nbsp;&nbsp;
+
+00:07:30.540 --> 00:07:33.060
+Thank you for watching and&nbsp;
+please check out our website&nbsp;&nbsp;
+
+00:07:33.060 --> 00:07:37.733
+for the paper and additional experimental results.
+
